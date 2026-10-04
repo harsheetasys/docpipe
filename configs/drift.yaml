@@ -1,0 +1,16 @@
+# Drift thresholds. PSI bands follow the common credit-risk convention:
+#   < 0.10 no significant shift, 0.10-0.25 moderate, > 0.25 major shift.
+psi_warn: 0.10
+psi_retrain: 0.25
+ks_pvalue: 0.01          # KS test must also reject at this level before a feature counts as drifted
+min_requests: 30         # below this the window is too small to judge
+conf_drop_warn: 0.05     # mean detector confidence drop vs baseline window
+conf_drop_retrain: 0.15
+fields_found_drop_retrain: 0.5   # avg key fields extracted per receipt (0-4) dropped by >= 0.5
+features:
+  - brightness_mean
+  - contrast_rms
+  - blur_laplacian_var
+  - dark_pixel_frac
+  - edge_density
+  - aspect_ratio

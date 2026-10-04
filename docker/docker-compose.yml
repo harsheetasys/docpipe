@@ -1,0 +1,47 @@
+# Local stack: MLflow tracking + registry, the API, Prometheus scraping it, and a
+# one-shot drift job. `docker compose -f docker/docker-compose.yml up --build`
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.17.2
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --artifacts-destination /mlflow/artifacts --serve-artifacts
+    ports: ["5000:5000"]
+    volumes: ["mlflow-data:/mlflow"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      retries: 10
+
+  api:
+    build: {context: .., dockerfile: docker/Dockerfile.api}
+    image: docpipe-api:local
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      DOCPIPE_MODEL_REFRESH_SECONDS: "30"
+    ports: ["8000:8000"]
+    volumes: ["../data:/data"]
+    depends_on:
+      mlflow: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {cpus: "2", memory: 2g}
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes: ["./prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["9090:9090"]
+    depends_on: [api]
+
+  drift-job:
+    build: {context: .., dockerfile: docker/Dockerfile.train}
+    image: docpipe-train:local
+    profiles: ["jobs"]            # run on demand: docker compose --profile jobs run drift-job
+    command: ["python", "-m", "docpipe.monitoring.drift", "--window-hours", "24"]
+    environment: {MLFLOW_TRACKING_URI: "http://mlflow:5000"}
+    volumes: ["../data:/data"]
+    depends_on: [mlflow]
+
+volumes:
+  mlflow-data:

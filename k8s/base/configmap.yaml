@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docpipe-config
+  namespace: docpipe
+data:
+  MLFLOW_TRACKING_URI: "http://mlflow.docpipe.svc.cluster.local:5000"
+  DOCPIPE_DATA_DIR: "/data"
+  DOCPIPE_MODEL_REFRESH_SECONDS: "60"
+  OMP_NUM_THREADS: "2"
+  drift.yaml: |
+    psi_warn: 0.10
+    psi_retrain: 0.25
+    ks_pvalue: 0.01
+    min_requests: 30
+    conf_drop_warn: 0.05
+    conf_drop_retrain: 0.15
+    fields_found_drop_retrain: 0.5

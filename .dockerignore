@@ -1,0 +1,10 @@
+data/raw
+data/yolo*
+data/lake
+data/mlruns
+data/inference_log
+.git
+__pycache__
+*.pt
+tests
+docs

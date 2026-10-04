@@ -1,0 +1,23 @@
+{
+  "alias": "previous",
+  "models": {
+    "docpipe-detector": 1
+  },
+  "n_docs": 97,
+  "e2e_exact_company": 0.3711340206185567,
+  "e2e_fuzzy90_company": 0.6082474226804123,
+  "e2e_found_company": 0.9587628865979382,
+  "e2e_exact_date": 0.4742268041237113,
+  "e2e_fuzzy90_date": 0.5154639175257731,
+  "e2e_found_date": 0.5463917525773195,
+  "e2e_exact_address": 0.030927835051546393,
+  "e2e_fuzzy90_address": 0.17525773195876287,
+  "e2e_found_address": 0.9587628865979382,
+  "e2e_exact_total": 0.1958762886597938,
+  "e2e_fuzzy90_total": 0.1958762886597938,
+  "e2e_found_total": 0.3917525773195876,
+  "e2e_exact_macro": 0.26804123711340205,
+  "e2e_fuzzy90_macro": 0.37371134020618557,
+  "e2e_latency_ms_p50": 4224.896910000098,
+  "e2e_latency_ms_p95": 5676.651585000218
+}

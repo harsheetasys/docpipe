@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+  namespace: docpipe
+  labels: {app: mlflow}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}      # sqlite backend => never two writers
+  selector:
+    matchLabels: {app: mlflow}
+  template:
+    metadata:
+      labels: {app: mlflow}
+    spec:
+      containers:
+        - name: mlflow
+          image: ghcr.io/mlflow/mlflow:v2.17.2
+          args: ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000",
+                 "--backend-store-uri", "sqlite:////mlflow/mlflow.db",
+                 "--artifacts-destination", "/mlflow/artifacts", "--serve-artifacts"]
+          ports: [{containerPort: 5000}]
+          volumeMounts: [{name: store, mountPath: /mlflow}]
+          readinessProbe:
+            httpGet: {path: /health, port: 5000}
+            initialDelaySeconds: 10
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: "1", memory: 1Gi}
+      volumes:
+        - name: store
+          persistentVolumeClaim: {claimName: mlflow-store}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow
+  namespace: docpipe
+spec:
+  selector: {app: mlflow}
+  ports: [{port: 5000, targetPort: 5000}]

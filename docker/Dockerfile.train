@@ -1,0 +1,17 @@
+# ---- training / batch image: adds Java for Spark and git for run provenance -------------
+FROM python:3.11-slim
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
+    DOCPIPE_ROOT=/app DOCPIPE_DATA_DIR=/data \
+    MLFLOW_TRACKING_URI=http://mlflow:5000 \
+    JAVA_HOME=/usr/lib/jvm/default-java YOLO_CONFIG_DIR=/tmp/yolo
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        default-jre-headless git tesseract-ocr tesseract-ocr-eng libglib2.0-0 libgl1 \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+COPY docpipe ./docpipe
+COPY configs ./configs
+COPY scripts ./scripts
+# default: the drift -> retrain worker; override `command` for one-off training jobs
+CMD ["python", "-m", "docpipe.monitoring.retrain_if_triggered"]

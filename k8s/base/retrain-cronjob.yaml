@@ -1,0 +1,30 @@
+# Nightly: retrain ONLY if the drift job left a trigger, then run the promotion gate.
+# The API pods pick up a new champion through their refresh loop; no redeploy.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: docpipe-retrain
+  namespace: docpipe
+spec:
+  schedule: "30 2 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 14400
+      template:
+        spec:
+          restartPolicy: Never
+          nodeSelector: {workload: training}   # land on the CPU/GPU training pool
+          containers:
+            - name: retrain
+              image: ghcr.io/OWNER/docpipe-train:0.1.0
+              command: ["python", "-m", "docpipe.monitoring.retrain_if_triggered", "--epochs", "30"]
+              envFrom: [{configMapRef: {name: docpipe-config}}]
+              volumeMounts: [{name: data, mountPath: /data}]
+              resources:
+                requests: {cpu: "4", memory: 8Gi}
+                limits:   {cpu: "8", memory: 16Gi}
+          volumes:
+            - name: data
+              persistentVolumeClaim: {claimName: docpipe-data}

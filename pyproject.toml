@@ -1,0 +1,21 @@
+[project]
+name = "docpipe"
+version = "0.1.0"
+description = "Receipt/invoice field extraction (detection + segmentation + OCR) with a production MLOps loop"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+include = ["docpipe*"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+ignore = ["E501", "B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

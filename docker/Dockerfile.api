@@ -1,0 +1,27 @@
+# ---- serving image: CPU inference, tesseract, non-root ---------------------------------
+# Two stages so the final image carries no compilers / pip cache (~1.1 GB vs ~2.5 GB).
+FROM python:3.11-slim AS builder
+ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+WORKDIR /build
+COPY requirements.txt .
+# CPU-only torch keeps the image small; swap the index for a CUDA build on GPU nodes.
+RUN pip install --prefix=/install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+
+FROM python:3.11-slim
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
+    DOCPIPE_ROOT=/app DOCPIPE_DATA_DIR=/data \
+    MLFLOW_TRACKING_URI=http://mlflow:5000 \
+    OMP_NUM_THREADS=2 YOLO_CONFIG_DIR=/tmp/yolo
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        tesseract-ocr tesseract-ocr-eng libglib2.0-0 libgl1 curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -r -u 10001 -d /app docpipe && mkdir -p /data /app && chown -R docpipe /data /app
+COPY --from=builder /install /usr/local
+WORKDIR /app
+COPY --chown=docpipe docpipe ./docpipe
+COPY --chown=docpipe configs ./configs
+USER docpipe
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD curl -fsS http://localhost:8000/ready || exit 1
+CMD ["uvicorn", "docpipe.serving.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

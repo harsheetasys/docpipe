@@ -1,0 +1,79 @@
+{
+  "best_recipe": "autocontrast",
+  "results": {
+    "raw": {
+      "cer": 0.09243041116315726,
+      "cer_median": 0.0,
+      "exact_match": 0.6133333333333333,
+      "mean_confidence": 0.7869248412698412,
+      "latency_ms_per_line": 130.35519921666645,
+      "cer_other": 0.09198953229709961,
+      "cer_address": 0.036046517020051995,
+      "cer_total": 0.16183473389355743,
+      "cer_date": 0.10634326457855871,
+      "cer_company": 0.01649636011487344
+    },
+    "autocontrast": {
+      "cer": 0.09007617739060594,
+      "cer_median": 0.0,
+      "exact_match": 0.6133333333333333,
+      "mean_confidence": 0.7847545238095238,
+      "latency_ms_per_line": 127.08458409333464,
+      "cer_other": 0.08988373146106655,
+      "cer_address": 0.0314088358606317,
+      "cer_total": 0.15448179271708684,
+      "cer_date": 0.10634326457855871,
+      "cer_company": 0.019345362963876286
+    },
+    "otsu": {
+      "cer": 0.11269261287673989,
+      "cer_median": 0.0,
+      "exact_match": 0.5383333333333333,
+      "mean_confidence": 0.7531418849206348,
+      "latency_ms_per_line": 125.4598245666663,
+      "cer_other": 0.11372546751821423,
+      "cer_address": 0.042218380583219896,
+      "cer_total": 0.17433473389355741,
+      "cer_date": 0.12495670995670997,
+      "cer_company": 0.02454788990553366
+    },
+    "upscale2x": {
+      "cer": 0.12013855461502061,
+      "cer_median": 0.0,
+      "exact_match": 0.565,
+      "mean_confidence": 0.7580625396825396,
+      "latency_ms_per_line": 130.87193929666682,
+      "cer_other": 0.11849008373620601,
+      "cer_address": 0.0754587553453338,
+      "cer_total": 0.18806022408963585,
+      "cer_date": 0.16716450216450215,
+      "cer_company": 0.04756698416320218
+    },
+    "upscale2x_otsu": {
+      "cer": 0.13262509917725152,
+      "cer_median": 0.0,
+      "exact_match": 0.5316666666666666,
+      "mean_confidence": 0.751819742063492,
+      "latency_ms_per_line": 129.2156454533324,
+      "cer_other": 0.12986476309607256,
+      "cer_address": 0.08635613493836555,
+      "cer_total": 0.2186974789915966,
+      "cer_date": 0.18697097020626433,
+      "cer_company": 0.05358933830182077
+    },
+    "upscale2x_denoise_otsu": {
+      "cer": 0.11902441091307425,
+      "cer_median": 0.0,
+      "exact_match": 0.5416666666666666,
+      "mean_confidence": 0.7618519312169313,
+      "latency_ms_per_line": 130.64110229333286,
+      "cer_other": 0.11651077700413529,
+      "cer_address": 0.061465196569166325,
+      "cer_total": 0.21596638655462186,
+      "cer_date": 0.16749045072574484,
+      "cer_company": 0.026661666212858353
+    }
+  },
+  "n_lines": 600,
+  "run_id": "0fc15aaed09c4e5fa7786457da86e149"
+}

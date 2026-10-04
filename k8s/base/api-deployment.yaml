@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docpipe-api
+  namespace: docpipe
+  labels: {app: docpipe-api}
+  annotations:
+    # keep 10 ReplicaSets so `kubectl rollout undo --to-revision=N` can reach back far
+    deployment.kubernetes.io/revision-history-limit: "10"
+spec:
+  replicas: 2
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1          # bring one new pod up ...
+      maxUnavailable: 0    # ... before taking any old pod down => zero-downtime rollout
+  selector:
+    matchLabels: {app: docpipe-api}
+  template:
+    metadata:
+      labels: {app: docpipe-api}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: /metrics
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: api
+          image: ghcr.io/OWNER/docpipe-api:0.1.0   # CI replaces OWNER/tag
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 8000, name: http}]
+          envFrom: [{configMapRef: {name: docpipe-config}}]
+          volumeMounts: [{name: data, mountPath: /data}]
+          # liveness = process alive; readiness = champion model loaded. Separate on purpose:
+          # a pod downloading a new 6 MB champion is alive but must not receive traffic.
+          livenessProbe:
+            httpGet: {path: /health, port: http}
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          readinessProbe:
+            httpGet: {path: /ready, port: http}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+          startupProbe:
+            httpGet: {path: /health, port: http}
+            failureThreshold: 30
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 500m, memory: 1Gi}
+            limits:   {cpu: "2",  memory: 2Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false   # tesseract + torch write to /tmp
+            capabilities: {drop: ["ALL"]}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: docpipe-data}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docpipe-api
+  namespace: docpipe
+  labels: {app: docpipe-api}
+spec:
+  type: ClusterIP
+  selector: {app: docpipe-api}
+  ports: [{port: 80, targetPort: http, name: http}]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: docpipe-api
+  namespace: docpipe
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: {app: docpipe-api}

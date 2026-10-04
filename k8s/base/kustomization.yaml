@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: docpipe
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - pvc.yaml
+  - mlflow.yaml
+  - api-deployment.yaml
+  - hpa.yaml
+  - drift-cronjob.yaml
+  - retrain-cronjob.yaml
+images:
+  - name: ghcr.io/OWNER/docpipe-api
+    newTag: 0.1.0
+  - name: ghcr.io/OWNER/docpipe-train
+    newTag: 0.1.0

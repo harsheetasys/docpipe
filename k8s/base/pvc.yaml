@@ -1,0 +1,23 @@
+# Shared data volume: feature store, inference log, drift reports, MLflow artifacts.
+# RWX so the API pods, the drift CronJob and the retrain Job can all mount it.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: docpipe-data
+  namespace: docpipe
+spec:
+  accessModes: ["ReadWriteMany"]
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-store
+  namespace: docpipe
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi

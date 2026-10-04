@@ -1,0 +1,29 @@
+# kind / minikube: single replica, local images, RWO storage.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: ["../../base"]
+images:
+  - name: ghcr.io/OWNER/docpipe-api
+    newName: docpipe-api
+    newTag: local
+  - name: ghcr.io/OWNER/docpipe-train
+    newName: docpipe-train
+    newTag: local
+patches:
+  - target: {kind: Deployment, name: docpipe-api}
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target: {kind: PersistentVolumeClaim, name: docpipe-data}
+    patch: |-
+      - op: replace
+        path: /spec/accessModes
+        value: ["ReadWriteOnce"]
+  - target: {kind: CronJob, name: docpipe-retrain}
+    patch: |-
+      - op: remove
+        path: /spec/jobTemplate/spec/template/spec/nodeSelector
